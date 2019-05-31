@@ -8,7 +8,7 @@ public class DatabaseConnectionService {
 	private static DatabaseConnectionService unique;
 	private final String SampleURL = "jdbc:sqlserver://${dbServer};databaseName=${dbName};user=${user};password={${pass}}";
 
-	private Connection connection = null;
+	private static Connection connection = null;
 
 	private String databaseName;
 	private String serverName;
@@ -44,14 +44,13 @@ public class DatabaseConnectionService {
 	}
 
 	public Connection getConnection() {
-		return this.connection;
+		return connection;
 	}
 
-	public void closeConnection() {
+	public static void closeConnection() {
 		try {
 			if (connection != null && !connection.isClosed()) {
-				this.connection.rollback();
-				this.connection.close();
+				connection.close();
 			}
 		} catch (SQLException e) {
 			Main.gui.displayMessage(e.getMessage());

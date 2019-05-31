@@ -8,11 +8,12 @@ import java.util.Properties;
 public class Main {
 	
 	static GUI gui;
+	static DatabaseConnectionService dbcs;
 	
 	public static void main(String[] args) {
 		gui = new GUI();
-		
 		connect();
+		gui.login();
 	}
 
 	private static void connect() {
@@ -24,7 +25,7 @@ public class Main {
 			gui.displayMessage("error reading property file");
 		}
 		
-		DatabaseConnectionService dbcs = DatabaseConnectionService.getService();
+		dbcs = DatabaseConnectionService.getService();
 
 		dbcs.setDatabaseInfo(dbProps.getProperty("serverName"), dbProps.getProperty("databaseName"));
 
