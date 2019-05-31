@@ -1,10 +1,14 @@
 package ecdb;
 
 import java.awt.Dimension;
+import java.awt.FileDialog;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
@@ -14,6 +18,7 @@ public class GUI {
 
 	JFrame frame;
 	JPanel body;
+	ImportService importService;
 	
 	public GUI() {
 		frame = new JFrame();
@@ -23,6 +28,7 @@ public class GUI {
 		frame.setTitle("Easy Creative");
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setVisible(true);
+		importService = new ImportService();
 	}
 	
 	public void displayMessage(String msg) {
@@ -47,6 +53,7 @@ public class GUI {
 		body.add(importButton);
 		body.add(exitButton);
 		
+		importButton.addActionListener(new importListener());
 		exitButton.addActionListener(new ExitListener());
 		body.revalidate();
 	}
@@ -59,5 +66,30 @@ public class GUI {
 			frame.dispose();
 		}
 
+	}
+	
+	private class importListener implements ActionListener {
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			FileDialog dialog = new FileDialog(frame, "Select File to Open");
+		    dialog.setMode(FileDialog.LOAD);
+		    dialog.setVisible(true);
+		    String directory = dialog.getDirectory();
+		    String file = dialog.getFile();
+		    importFile(directory + file);
+		}
+	}
+	
+	private void importFile(String fileName) {
+		File file = new File(fileName);
+		BufferedReader br = null;
+		try {
+			br = new BufferedReader(new FileReader(file));
+		} catch (FileNotFoundException e) {
+			displayMessage("ERROR Creating File Reader");
+		}
+		
+		importService.importFile(br);		
 	}
 }
