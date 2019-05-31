@@ -20,7 +20,15 @@ public class GUI {
 		frame.setVisible(true);
 	}
 	
-	public void displayError(String msg) {
+	public void displayMessage(String msg) {
 		JOptionPane.showMessageDialog(null, msg);
+	}
+
+	public void startConnecting() {
+		frame.setTitle("Connecting...");
+	}
+
+	public void titleSetName() {
+		frame.setTitle("Easy Creative");
 	}
 }
