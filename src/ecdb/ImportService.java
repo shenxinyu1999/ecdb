@@ -63,4 +63,19 @@ public class ImportService {
 			}
 		}
 	}
+
+	public void removeTables() {
+		String query = "DROP TABLE Sheet1";
+		Connection c = dbcs.getConnection();
+		
+		try {
+			PreparedStatement stmt = c.prepareStatement(query);
+			stmt.executeQuery();
+		} catch (SQLException e) {
+			if(!e.getMessage().equals("The statement did not return a result set.")) {
+				System.out.println(query);
+				Main.gui.displayMessage(e.getMessage());
+			}
+		}
+	}
 }

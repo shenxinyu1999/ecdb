@@ -62,6 +62,7 @@ public class GUI {
 
 		@Override
 		public void actionPerformed(ActionEvent arg0) {
+			importService.removeTables();
 			DatabaseConnectionService.closeConnection();
 			frame.dispose();
 		}
