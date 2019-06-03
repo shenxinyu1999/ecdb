@@ -24,6 +24,7 @@ public class ImportService {
 				String[] data = st.split(",");
 				addData(data);
 			}
+			Main.gui.displayMessage("导入完成");
 		} catch (IOException e) {
 			Main.gui.displayMessage("ERROR when reading file");
 		}
@@ -31,10 +32,17 @@ public class ImportService {
 
 	private void addKey(String[] key) {
 		String query = "CREATE TABLE Sheet1 (\r\n" + 
-				"    " + key[0] + " int,\r\n" + 
-				"    " + key[1] + " varchar(20),\r\n" + 
-				"    " + key[2] + " float,\r\n" + 
-				"    " + key[3] + " varchar(20),\r\n" + 
+				"    " + key[0] + " int,\r\n" + 			//编号
+				"    " + key[1] + " varchar(20),\r\n" + 	//运单编号
+				"    " + key[2] + " varchar(20),\r\n" + 	//收件省
+				"    " + key[3] + " float,\r\n" +			//重量
+				"    " + key[4] + " float,\r\n" + 			//计费重量
+				"    " + key[5] + " float,\r\n" + 			//单位总价
+				"    " + key[6] + " varchar(20),\r\n" + 	//快递公司
+				"    " + key[7] + " int,\r\n" + 			//月份
+				"    " + key[8] + " varchar(50),\r\n" + 	//对应订单号
+				"    " + key[9] + " varchar(20),\r\n" + 	//对应店铺
+				"    " + key[10] + " TEXT,\r\n" + 	//备注
 				")";
 
 		Connection c = dbcs.getConnection();
@@ -50,7 +58,18 @@ public class ImportService {
 	}
 	
 	private void addData(String[] data) {
-		String query = "INSERT INTO Sheet1 VALUES (" + data[0] + ",'" + data[1] + "'," + data[2] + ",'" + data[3] + "')";
+		String query = "INSERT INTO Sheet1 VALUES (";
+		query = query + 	  data[0] + 	  ",";
+		query = query + "'" + data[1] + "'" + ",";
+		query = query + "'" + data[2] + "'" + ",";
+		query = query + 	  data[3] + 	  ",";
+		query = query + 	  data[4] + 	  ",";
+		query = query + 	  data[5] + 	  ",";
+		query = query + "'" + data[6] + "'" + ",";
+		query = query + 	  data[7] + 	  ",";
+		query = query + "'" + data[8] + "'" + ",";
+		query = query + "'" + data[9] + "'" + ",";
+		query = query + "'" + data[10] + "'" + ")";
 		Connection c = dbcs.getConnection();
 		
 		try {
