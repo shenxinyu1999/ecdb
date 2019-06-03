@@ -42,7 +42,7 @@ public class ImportService {
 				"    " + key[7] + " int,\r\n" + 			//月份
 				"    " + key[8] + " varchar(50),\r\n" + 	//对应订单号
 				"    " + key[9] + " varchar(20),\r\n" + 	//对应店铺
-				"    " + key[10] + " TEXT,\r\n" + 	//备注
+				"    " + key[10] + " TEXT,\r\n" + 			//备注
 				")";
 
 		Connection c = dbcs.getConnection();
