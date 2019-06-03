@@ -1,12 +1,9 @@
 package ecdb;
 
 import java.awt.BorderLayout;
-import java.awt.Component;
-import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.FileDialog;
 import java.awt.FlowLayout;
-import java.awt.LayoutManager;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedReader;
@@ -14,24 +11,16 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableCellEditor;
-import javax.swing.table.TableCellRenderer;
 
 public class GUI {
 
 	JFrame frame;
 	JPanel body;
-	JPanel table;
+	TablePanel table;
 	ImportService importService;
 	SearchService searchService;
 
@@ -39,7 +28,7 @@ public class GUI {
 		frame = new JFrame();
 		frame.setLayout(new BorderLayout());
 		body = new JPanel(new FlowLayout());
-		table = new JPanel(new FlowLayout());
+		table = new TablePanel();
 		frame.add(body,BorderLayout.NORTH);
 		frame.add(table,BorderLayout.CENTER);
 		frame.setMinimumSize(new Dimension(1920, 1080));
@@ -142,62 +131,7 @@ public class GUI {
 	}
 
 	private void displayResultSet(ResultSet rs) {
-
-		Object[][] data;
-		Object[] columnNames;
-		if (rs == null)
-			return;
-
-		ResultSetMetaData meta;
-		try {
-			table.removeAll();
-			meta = rs.getMetaData();
-			columnNames = new Object[meta.getColumnCount()+1];
-			int size = 0;
-			if (rs.last()) {
-				size = rs.getRow();
-			}
-			rs.beforeFirst();
-			data = new Object[size][meta.getColumnCount() + 1];
-
-			for (int col = 1; col <= meta.getColumnCount(); col++) {
-				columnNames[col - 1] = meta.getColumnLabel(col);
-			}
-			columnNames[meta.getColumnCount()] = "check";
-			for (int row = 1; rs.next(); row++) {
-				for (int col = 1; col <= meta.getColumnCount(); col++) {
-					data[row - 1][col - 1] = rs.getObject(col);
-				}
-				data[row - 1][meta.getColumnCount()] = false;
-			}
-			rs.beforeFirst();
-			DefaultTableModel model = new DefaultTableModel(data, columnNames);
-			JTable t = new JTable(model){
-	            @Override
-	            public TableCellRenderer getCellRenderer(int row, int column) {
-	                if(getValueAt(row, column) instanceof Boolean) {
-	                    return super.getDefaultRenderer(Boolean.class);
-	                } else {
-	                    return super.getCellRenderer(row, column);
-	                }
-	            }
-
-	            @Override
-	            public TableCellEditor getCellEditor(int row, int column) {
-	                if(getValueAt(row, column) instanceof Boolean) {
-	                    return super.getDefaultEditor(Boolean.class);
-	                } else {
-	                    return super.getCellEditor(row, column);
-	                }
-	            }
-	        };
-			JScrollPane jp = new JScrollPane(t, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-					JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-			table.add(jp, BorderLayout.CENTER);
-			frame.pack();
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-
+		table.displayResultSet(rs);
+		frame.pack();
 	}
 }
