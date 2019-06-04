@@ -53,22 +53,18 @@ public class GUI {
 
 	public void login() {
 		JButton importButton = new JButton("导入数据");
-		JButton hebingButton = new JButton("合并");
 		JButton duplicateButton = new JButton("查看重复订单号");
 		JButton exitButton = new JButton("退出");
 
 		importButton.setPreferredSize(new Dimension(200, 100));
-		hebingButton.setPreferredSize(new Dimension(200, 100));
 		duplicateButton.setPreferredSize(new Dimension(200, 100));
 		exitButton.setPreferredSize(new Dimension(200, 100));
 
 		body.add(importButton);
-		body.add(hebingButton);
 		body.add(duplicateButton);
 		body.add(exitButton);
 
 		importButton.addActionListener(new importListener());
-		hebingButton.addActionListener(new hebingListener());
 		duplicateButton.addActionListener(new duplicateListener());
 		exitButton.addActionListener(new ExitListener());
 		body.revalidate();
@@ -96,16 +92,6 @@ public class GUI {
 			String file = dialog.getFile();
 			importFile(directory + file);
 		}
-	}
-
-	private class hebingListener implements ActionListener {
-
-		@Override
-		public void actionPerformed(ActionEvent arg0) {
-			// TODO Auto-generated method stub
-
-		}
-
 	}
 
 	private class duplicateListener implements ActionListener {
