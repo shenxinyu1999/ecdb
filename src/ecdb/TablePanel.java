@@ -20,19 +20,15 @@ import javax.swing.table.TableCellRenderer;
 
 public class TablePanel extends JPanel {
 
-	JButton combine;
-	JTable currentResult;
+	JTable before;
+	JTable after;
 	private DatabaseConnectionService dbcs = DatabaseConnectionService.getService();
 	
 	public TablePanel() {
 		setLayout(new FlowLayout());
-		combine = new JButton("ºÏ²¢");
-		combine.setPreferredSize(new Dimension(200, 100));
-		combine.addActionListener(new CombineListener());
-		combine.setEnabled(false);
 	}
 
-	public void displayResultSet(ResultSet rs) {
+	public void displayResultSet(ResultSet rs, int i) {
 		Object[][] data;
 		Object[] columnNames;
 		
@@ -43,10 +39,8 @@ public class TablePanel extends JPanel {
 		ResultSetMetaData meta;
 		
 		try {
-			removeAll();
-			
 			meta = rs.getMetaData();
-			columnNames = new Object[meta.getColumnCount() + 1];
+			columnNames = new Object[meta.getColumnCount()];
 			
 			int size = 0;
 			if (rs.last()) {
@@ -54,50 +48,32 @@ public class TablePanel extends JPanel {
 			}
 			
 			rs.beforeFirst();
-			data = new Object[size][meta.getColumnCount() + 1];
+			data = new Object[size][meta.getColumnCount()];
 
 			for (int col = 1; col <= meta.getColumnCount(); col++) {
 				columnNames[col - 1] = meta.getColumnLabel(col);
 			}
-			columnNames[meta.getColumnCount()] = "check";
 			
 			for (int row = 1; rs.next(); row++) {
 				for (int col = 1; col <= meta.getColumnCount(); col++) {
 					data[row - 1][col - 1] = rs.getObject(col);
 				}
-				data[row - 1][meta.getColumnCount()] = false;
 			}
 			
 			rs.beforeFirst();
 			
 			DefaultTableModel model = new DefaultTableModel(data, columnNames);
 			
-			currentResult = new JTable(model) {
-				@Override
-				public TableCellRenderer getCellRenderer(int row, int column) {
-					if (getValueAt(row, column) instanceof Boolean) {
-						return super.getDefaultRenderer(Boolean.class);
-					} else {
-						return super.getCellRenderer(row, column);
-					}
-				}
-
-				@Override
-				public TableCellEditor getCellEditor(int row, int column) {
-					if (getValueAt(row, column) instanceof Boolean) {
-						return super.getDefaultEditor(Boolean.class);
-					} else {
-						return super.getCellEditor(row, column);
-					}
-				}
-			};
+			if(i == 0) {
+				before = new JTable(model);
+			}else {
+				after = new JTable(model);
+			}
 			
-			JScrollPane jp = new JScrollPane(currentResult, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+			JScrollPane jp = new JScrollPane(i == 0? before:after, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
 					JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 			
 			add(jp);
-			add(combine);
-			combine.setEnabled(true);
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -107,17 +83,16 @@ public class TablePanel extends JPanel {
 
 		@Override
 		public void actionPerformed(ActionEvent arg0) {
-			int col = currentResult.getModel().getColumnCount();
-			int row = currentResult.getModel().getRowCount();
+			int col = before.getModel().getColumnCount();
+			int row = before.getModel().getRowCount();
 			String[] r = new String[row];
 			for(int i = 0; i < row; i++) {
-				if((boolean) currentResult.getModel().getValueAt(i, col - 1)) {
-					Object data = currentResult.getModel().getValueAt(i, col - 2);
+				if((boolean) before.getModel().getValueAt(i, col - 1)) {
+					Object data = before.getModel().getValueAt(i, col - 2);
 					r[i] = (String) data;
 				}
 			}
 			combineData(r);
-			combine.setEnabled(false);
 		}
 
 		private void combineData(String[] r) {

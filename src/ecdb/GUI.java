@@ -6,10 +6,7 @@ import java.awt.FileDialog;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.sql.ResultSet;
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -20,6 +17,7 @@ public class GUI {
 
 	JFrame frame;
 	JPanel body;
+	JPanel importButtons;
 	TablePanel table;
 	ImportService importService;
 	SearchService searchService;
@@ -28,9 +26,11 @@ public class GUI {
 		frame = new JFrame();
 		frame.setLayout(new BorderLayout());
 		body = new JPanel(new FlowLayout());
+		importButtons = new JPanel(new FlowLayout());
 		table = new TablePanel();
-		frame.add(body,BorderLayout.NORTH);
-		frame.add(table,BorderLayout.CENTER);
+		frame.add(body, BorderLayout.NORTH);
+		frame.add(importButtons, BorderLayout.WEST);
+		frame.add(table, BorderLayout.CENTER);
 		frame.setMinimumSize(new Dimension(1920, 1080));
 		frame.setTitle("Easy Creative");
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -53,20 +53,25 @@ public class GUI {
 
 	public void login() {
 		JButton importButton = new JButton("导入数据");
+		JButton markDup = new JButton("标记重复");
 		JButton duplicateButton = new JButton("查看重复订单号");
 		JButton exitButton = new JButton("退出");
 
-		importButton.setPreferredSize(new Dimension(200, 100));
-		duplicateButton.setPreferredSize(new Dimension(200, 100));
-		exitButton.setPreferredSize(new Dimension(200, 100));
+		importButton.setPreferredSize(new Dimension(100, 50));
+		markDup.setPreferredSize(new Dimension(100,50));
+		duplicateButton.setPreferredSize(new Dimension(100, 50));
+		exitButton.setPreferredSize(new Dimension(100, 50));
 
 		body.add(importButton);
+		body.add(markDup);
 		body.add(duplicateButton);
 		body.add(exitButton);
 
 		importButton.addActionListener(new importListener());
+		markDup.addActionListener(new MarkDupListener());
 		duplicateButton.addActionListener(new duplicateListener());
 		exitButton.addActionListener(new ExitListener());
+
 		body.revalidate();
 	}
 
@@ -99,25 +104,30 @@ public class GUI {
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			ResultSet rs = searchService.searchDuplicate();
-			displayResultSet(rs);
+			displayResultSet(rs, 0);
+		}
+
+	}
+	
+	private class MarkDupListener implements ActionListener {
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			ResultSet rs = searchService.markDuplicate();
+			displayResultSet(rs, 0);
+			ResultSet rsa = searchService.markDuplicate();
+			displayResultSet(rsa, 1);
 		}
 
 	}
 
 	private void importFile(String fileName) {
 		File file = new File(fileName);
-		BufferedReader br = null;
-		try {
-			br = new BufferedReader(new FileReader(file));
-		} catch (FileNotFoundException e) {
-			displayMessage("ERROR Creating File Reader");
-		}
-
-		importService.importFile(br);
+		importService.importFile(file);
 	}
 
-	private void displayResultSet(ResultSet rs) {
-		table.displayResultSet(rs);
+	private void displayResultSet(ResultSet rs, int i) {
+		table.displayResultSet(rs, i);
 		frame.pack();
 	}
 }

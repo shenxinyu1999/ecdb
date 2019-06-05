@@ -27,4 +27,23 @@ public class SearchService {
 
 		return rs;
 	}
+
+	public ResultSet markDuplicate() {
+		Connection c = dbcs.getConnection();
+		String query = "SELECT * \r\n" + 
+				"FROM 原始数据\r\n" + 
+				"WHERE 运单编号 IN \r\n" + 
+				"(SELECT 运单编号 FROM 原始数据 GROUP BY 运单编号,备注 HAVING COUNT(运单编号) > 1)";
+		
+		ResultSet rs = null;
+		try {
+			PreparedStatement stmt = c.prepareStatement(query, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+			rs = stmt.executeQuery();
+		} catch (SQLException e) {
+			Main.gui.displayMessage(e.getMessage());
+		}
+
+		return rs;
+	}
+	
 }
