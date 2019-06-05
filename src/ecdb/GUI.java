@@ -115,6 +115,7 @@ public class GUI {
 		public void actionPerformed(ActionEvent e) {
 			ResultSet rs = searchService.markDuplicate();
 			displayResultSet(rs, 0);
+			searchService.doMarkDup();
 			ResultSet rsa = searchService.markDuplicate();
 			displayResultSet(rsa, 1);
 		}
