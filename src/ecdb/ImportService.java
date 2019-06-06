@@ -35,6 +35,7 @@ public class ImportService {
 		}
 
 		sheetNum = wb.getNumberOfSheets();
+		sheetNum = 1;
 		for (int index = 0; index < sheetNum; index++) {
 			XSSFSheet sheet = wb.getSheetAt(index);
 			Main.gui.frame.setTitle("importing " + sheet.getSheetName());

@@ -33,7 +33,8 @@ public class SearchService {
 		String query = "SELECT * \r\n" + 
 				"FROM 原始数据\r\n" + 
 				"WHERE 运单编号 IN \r\n" + 
-				"(SELECT 运单编号 FROM 原始数据 GROUP BY 运单编号,备注 HAVING COUNT(运单编号) > 1)";
+				"(SELECT 运单编号 FROM 原始数据 GROUP BY 运单编号 HAVING COUNT(运单编号) > 1) \r\n" + 
+				"ORDER BY 运单编号";
 		
 		ResultSet rs = null;
 		try {
@@ -82,7 +83,7 @@ public class SearchService {
 				"\r\n" + 
 				"INSERT INTO @Temp SELECT 原始数据.* \r\n" + 
 				"FROM 原始数据 JOIN \r\n" + 
-				"(SELECT MIN(编号) AS 编号, 运单编号 FROM 原始数据 GROUP BY 运单编号 HAVING COUNT(运单编号) > 1) AS k\r\n" + 
+				"(SELECT MAX(编号) AS 编号, 运单编号 FROM 原始数据 GROUP BY 运单编号,月份 HAVING COUNT(运单编号) > 1) AS k\r\n" + 
 				"ON k.编号 = 原始数据.编号 AND k.运单编号 = 原始数据.运单编号\r\n" + 
 				"\r\n" + 
 				"UPDATE 原始数据\r\n" + 
