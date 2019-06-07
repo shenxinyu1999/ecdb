@@ -33,7 +33,7 @@ public class SearchService {
 		String query = "SELECT * \r\n" + 
 				"FROM 原始数据\r\n" + 
 				"WHERE 运单编号 IN \r\n" + 
-				"(SELECT 运单编号 FROM 原始数据 GROUP BY 运单编号 HAVING COUNT(运单编号) > 1) \r\n" + 
+				"(SELECT 运单编号 FROM 原始数据 GROUP BY 运单编号 HAVING COUNT(运单编号) =2) \r\n" + 
 				"ORDER BY 运单编号";
 		
 		ResultSet rs = null;
@@ -63,7 +63,7 @@ public class SearchService {
 				"\r\n" + 
 				"INSERT INTO @Temp SELECT 原始数据.* \r\n" + 
 				"FROM 原始数据 JOIN \r\n" + 
-				"(SELECT MAX(月份) AS 月份, 运单编号 FROM 原始数据 GROUP BY 运单编号 HAVING COUNT(运单编号) > 1) AS k\r\n" + 
+				"(SELECT MAX(月份) AS 月份, 运单编号 FROM 原始数据 GROUP BY 运单编号 HAVING COUNT(运单编号) =2) AS k\r\n" + 
 				"ON k.月份 = 原始数据.月份 AND k.运单编号 = 原始数据.运单编号\r\n" + 
 				"\r\n" + 
 				"UPDATE 原始数据\r\n" + 
@@ -83,7 +83,7 @@ public class SearchService {
 				"\r\n" + 
 				"INSERT INTO @Temp SELECT 原始数据.* \r\n" + 
 				"FROM 原始数据 JOIN \r\n" + 
-				"(SELECT MAX(编号) AS 编号, 运单编号 FROM 原始数据 GROUP BY 运单编号,月份 HAVING COUNT(运单编号) > 1) AS k\r\n" + 
+				"(SELECT MAX(编号) AS 编号, 运单编号 FROM 原始数据 GROUP BY 运单编号,月份 HAVING COUNT(运单编号) =2) AS k\r\n" + 
 				"ON k.编号 = 原始数据.编号 AND k.运单编号 = 原始数据.运单编号\r\n" + 
 				"\r\n" + 
 				"UPDATE 原始数据\r\n" + 
@@ -108,6 +108,67 @@ public class SearchService {
 				Main.gui.displayMessage(e.getMessage());
 			}
 		}
+	}
+
+	
+	public void findOrderNum(int count) {
+		Connection c = dbcs.getConnection();
+		String query = "SELECT * INTO 结果 FROM 原始数据 WHERE 备注=''\r\n" + 
+				"\r\n" + 
+				"ALTER TABLE 结果\r\n" + 
+				"ADD \r\n" + 
+				"对应订单号 varchar(8000),\r\n" + 
+				"对应店铺 varchar(8000)\r\n" + 
+				"\r\n" + 
+				"UPDATE 结果\r\n" + 
+				"SET 对应订单号 = ''\r\n" + 
+				"WHERE 对应订单号 IS NULL\r\n" + 
+				"\r\n" + 
+				"UPDATE 结果\r\n" + 
+				"SET 对应店铺 = ''\r\n" + 
+				"WHERE 对应店铺 IS NULL\r\n";
+		for(int i = 1; i<count; i++) {
+			String s = "对应数据" + Integer.toString(i);
+			query = query + 
+					"UPDATE t2\r\n" + 
+					"SET t2.对应订单号 = t1.订单号\r\n" + 
+					"FROM (SELECT * FROM "
+					+ s
+					+ " WHERE 电子面单号 IN (SELECT 电子面单号 FROM "
+					+ s
+					+ " GROUP BY 电子面单号 HAVING COUNT(电子面单号) = 1)) AS t1\r\n" + 
+					"JOIN 结果 t2 on t1.电子面单号 = t2.运单编号\r\n" + 
+					"WHERE 对应订单号 = ''";
+		}
+		
+				
+		
+		ResultSet rs = null;
+		try {
+			PreparedStatement stmt = c.prepareStatement(query, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+			rs = stmt.executeQuery();
+		} catch (SQLException e) {
+			Main.gui.displayMessage(e.getMessage());
+		}
+	}
+
+	public ResultSet markAfterDuplicate() {
+		Connection c = dbcs.getConnection();
+		String query = "SELECT * \r\n" + 
+				"FROM 原始数据\r\n" + 
+				"WHERE 运单编号 IN \r\n" + 
+				"(SELECT 运单编号 FROM 原始数据 GROUP BY 运单编号 HAVING COUNT(运单编号) >2) \r\n" + 
+				"ORDER BY 运单编号";
+		
+		ResultSet rs = null;
+		try {
+			PreparedStatement stmt = c.prepareStatement(query, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+			rs = stmt.executeQuery();
+		} catch (SQLException e) {
+			Main.gui.displayMessage(e.getMessage());
+		}
+
+		return rs;
 	}
 	
 }

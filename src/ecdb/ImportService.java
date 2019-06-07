@@ -35,7 +35,7 @@ public class ImportService {
 		}
 
 		sheetNum = wb.getNumberOfSheets();
-		sheetNum = 1;
+		Main.gui.count = sheetNum;
 		for (int index = 0; index < sheetNum; index++) {
 			XSSFSheet sheet = wb.getSheetAt(index);
 			Main.gui.frame.setTitle("importing " + sheet.getSheetName());
@@ -123,6 +123,7 @@ public class ImportService {
 			Main.gui.displayMessage(e.getMessage());
 		}
 		Main.gui.displayMessage("导入完成");
+		Main.gui.titleSetName();
 	}
 
 	private void addData0(int[] noAndMonth, double[] weightAndPrice, String[] information) {
@@ -284,7 +285,7 @@ public class ImportService {
 	}
 
 	public void removeTables() {
-		String query = "DROP TABLE 原始数据 ";
+		String query = "DROP TABLE 原始数据 DROP TABLE 结果 ";
 		for(int i = 1; i<sheetNum; i++) {
 			query = query + "DROP TABLE 对应数据"
 					+ Integer.toString(i)

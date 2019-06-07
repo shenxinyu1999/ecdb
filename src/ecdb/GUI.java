@@ -21,6 +21,7 @@ public class GUI {
 	TablePanel table;
 	ImportService importService;
 	SearchService searchService;
+	int count = 0;
 
 	public GUI() {
 		frame = new JFrame();
@@ -53,22 +54,20 @@ public class GUI {
 
 	public void login() {
 		JButton importButton = new JButton("导入数据");
-		JButton markDup = new JButton("标记重复");
+		JButton markDup = new JButton("标记重复"); //仅能标记出现两次的（多于两次的显示出来）
+		JButton findOrderNum = new JButton("找寻对应订单号");
 		JButton duplicateButton = new JButton("查看重复订单号");
 		JButton exitButton = new JButton("退出");
 
-		importButton.setPreferredSize(new Dimension(100, 50));
-		markDup.setPreferredSize(new Dimension(100,50));
-		duplicateButton.setPreferredSize(new Dimension(100, 50));
-		exitButton.setPreferredSize(new Dimension(100, 50));
-
 		body.add(importButton);
 		body.add(markDup);
+		body.add(findOrderNum);
 		body.add(duplicateButton);
 		body.add(exitButton);
 
 		importButton.addActionListener(new importListener());
 		markDup.addActionListener(new MarkDupListener());
+		findOrderNum.addActionListener(new FindOrderNumListener());
 		duplicateButton.addActionListener(new duplicateListener());
 		exitButton.addActionListener(new ExitListener());
 
@@ -95,7 +94,7 @@ public class GUI {
 			dialog.setVisible(true);
 			String directory = dialog.getDirectory();
 			String file = dialog.getFile();
-			importFile(directory + file);
+			importService.importFile(new File(directory + file));
 		}
 	}
 
@@ -113,18 +112,21 @@ public class GUI {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			ResultSet rs = searchService.markDuplicate();
-			displayResultSet(rs, 0);
+			searchService.markDuplicate();
 			searchService.doMarkDup();
-			ResultSet rsa = searchService.markDuplicate();
-			displayResultSet(rsa, 1);
+			ResultSet rs = searchService.markAfterDuplicate();
+			displayResultSet(rs, 0);
 		}
 
 	}
+	
+	private class FindOrderNumListener implements ActionListener {
 
-	private void importFile(String fileName) {
-		File file = new File(fileName);
-		importService.importFile(file);
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			searchService.findOrderNum(count);
+		}
+
 	}
 
 	private void displayResultSet(ResultSet rs, int i) {
