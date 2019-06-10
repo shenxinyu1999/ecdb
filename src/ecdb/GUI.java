@@ -57,6 +57,7 @@ public class GUI {
 		JButton markDup = new JButton("标记重复"); //仅能标记出现两次的（多于两次的显示出来）
 		JButton findOrderNum = new JButton("找寻对应订单号");
 		JButton splitOrderNum = new JButton("分离对应订单号");
+		JButton findCKNum = new JButton("对应CK号");
 //		JButton duplicateButton = new JButton("查看重复订单号");
 		JButton exitButton = new JButton("退出");
 
@@ -64,6 +65,7 @@ public class GUI {
 		body.add(markDup);
 		body.add(findOrderNum);
 		body.add(splitOrderNum);
+		body.add(findCKNum);
 //		body.add(duplicateButton);
 		body.add(exitButton);
 
@@ -71,6 +73,7 @@ public class GUI {
 		markDup.addActionListener(new MarkDupListener());
 		findOrderNum.addActionListener(new FindOrderNumListener());
 		splitOrderNum.addActionListener(new SplitOrderNumListener());
+		findCKNum.addActionListener(new CKListener());
 //		duplicateButton.addActionListener(new duplicateListener());
 		exitButton.addActionListener(new ExitListener());
 
@@ -142,6 +145,15 @@ public class GUI {
 		public void actionPerformed(ActionEvent e) {
 			searchService.findslash16(count);
 			searchService.splitOrderNum();
+		}
+
+	}
+	
+	private class CKListener implements ActionListener {
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			searchService.findCK();
 		}
 
 	}

@@ -344,4 +344,27 @@ public class SearchService {
 
 		Main.gui.displayMessage("split finish");
 	}
+
+	
+	public void findCK() {
+		Connection c = dbcs.getConnection();
+		String query = "UPDATE t2  SET t2.对应订单号 = t1.凭证编号\r\n" + 
+				" FROM\r\n" + 
+				"(SELECT * FROM  系统) AS t1\r\n" + 
+				"JOIN 结果 t2 on t1.对方订单号 = t2.对应订单号\r\n" + 
+				"WHERE 对应订单号 NOT LIKE '%[^0123456789]%' AND 对应订单号 != ''";
+		
+		try {
+			PreparedStatement stmt = c.prepareStatement(query, ResultSet.TYPE_SCROLL_INSENSITIVE,
+					ResultSet.CONCUR_READ_ONLY);
+			stmt.executeQuery();
+		} catch (SQLException e) {
+			if (!e.getMessage().equals("The statement did not return a result set.")) {
+				System.out.println(query);
+				Main.gui.displayMessage(e.getMessage());
+			}
+		}
+
+		Main.gui.displayMessage("CK finish");
+	}
 }	
