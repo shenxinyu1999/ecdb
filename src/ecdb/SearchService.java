@@ -89,7 +89,7 @@ public class SearchService {
 				+ "对应订单号 varchar(8000),\r\n" + "对应店铺 varchar(8000)\r\n" + "\r\n" + "UPDATE 结果\r\n"
 				+ "SET 对应订单号 = ''\r\n" + "WHERE 对应订单号 IS NULL\r\n" + "\r\n" + "UPDATE 结果\r\n" + "SET 对应店铺 = ''\r\n"
 				+ "WHERE 对应店铺 IS NULL\r\n";
-		for (int i = 1; i < count; i++) {
+		for (int i = 1; i < count - 1; i++) {
 			String s = "对应数据" + Integer.toString(i);
 			query = query + "UPDATE t2\r\n" + "SET t2.对应订单号 = t1.订单号, t2.对应店铺 = t1.公司\r\n" + "FROM (SELECT * FROM " + s
 					+ " WHERE 电子面单号 IN (SELECT 电子面单号 FROM " + s + " GROUP BY 电子面单号 HAVING COUNT(电子面单号) = 1)) AS t1\r\n"
@@ -123,7 +123,7 @@ public class SearchService {
 				"	[对应店铺] [varchar](8000) NULL\r\n" + 
 				")\r\n";
 		
-		for (int i = 1; i < count; i++) {
+		for (int i = 1; i < count-1; i++) {
 			String s = "对应数据" + Integer.toString(i);
 			query = query + "INSERT INTO @temp\r\n" + 
 					"SELECT * FROM 结果 WHERE 运单编号 IN\r\n" + 
@@ -157,7 +157,7 @@ public class SearchService {
 				"	[公司] [varchar](8000) NULL\r\n" + 
 				")";
 		
-		for (int i = 1; i < count; i++) {
+		for (int i = 1; i < count-1; i++) {
 			String s = "对应数据" + Integer.toString(i);
 			query = query + "INSERT INTO @dy\r\n" + 
 					"SELECT * FROM "
@@ -316,10 +316,32 @@ public class SearchService {
 					}
 				}
 			}
-		}
-		
-		Main.gui.displayMessage("split finish");
-		
-		
+		}		
 	}
-}
+
+	
+	public void findslash16(int count) {
+		Connection c = dbcs.getConnection();
+		String query = "UPDATE t2 SET t2.对应订单号 = t1.订单号\r\n" + 
+				"FROM \r\n" + 
+				"(SELECT * FROM "
+				+ "对应数据"
+				+ Integer.toString(count-2)
+				+ ") AS t1\r\n" + 
+				"JOIN 结果 t2 ON t1.备注 = t2.对应订单号\r\n" + 
+				"WHERE 对应订单号 LIKE '%[_]16[_]%'";
+		
+		try {
+			PreparedStatement stmt = c.prepareStatement(query, ResultSet.TYPE_SCROLL_INSENSITIVE,
+					ResultSet.CONCUR_READ_ONLY);
+			stmt.executeQuery();
+		} catch (SQLException e) {
+			if (!e.getMessage().equals("The statement did not return a result set.")) {
+				System.out.println(query);
+				Main.gui.displayMessage(e.getMessage());
+			}
+		}
+
+		Main.gui.displayMessage("split finish");
+	}
+}	
