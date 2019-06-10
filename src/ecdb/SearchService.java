@@ -91,7 +91,7 @@ public class SearchService {
 				+ "WHERE 对应店铺 IS NULL\r\n";
 		for (int i = 1; i < count; i++) {
 			String s = "对应数据" + Integer.toString(i);
-			query = query + "UPDATE t2\r\n" + "SET t2.对应订单号 = t1.订单号\r\n" + "FROM (SELECT * FROM " + s
+			query = query + "UPDATE t2\r\n" + "SET t2.对应订单号 = t1.订单号, t2.对应店铺 = t1.公司\r\n" + "FROM (SELECT * FROM " + s
 					+ " WHERE 电子面单号 IN (SELECT 电子面单号 FROM " + s + " GROUP BY 电子面单号 HAVING COUNT(电子面单号) = 1)) AS t1\r\n"
 					+ "JOIN 结果 t2 on t1.电子面单号 = t2.运单编号\r\n" + "WHERE 对应订单号 = ''";
 		}
