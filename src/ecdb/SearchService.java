@@ -3,7 +3,13 @@ package ecdb;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.util.ArrayList;
+
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.table.DefaultTableModel;
 
 public class SearchService {
 
@@ -180,5 +186,140 @@ public class SearchService {
 		}
 
 		return rs;
+	}
+
+	public void splitOrderNum() {
+		Connection c = dbcs.getConnection();
+		String query = "SELECT * FROM 结果 WHERE 对应订单号 LIKE '%,%' AND 对应订单号 NOT LIKE '%[^0123456789_,]%' AND 对应订单号 != ''";
+		
+		ResultSet rs = null;
+		try {
+			PreparedStatement stmt = c.prepareStatement(query, ResultSet.TYPE_SCROLL_INSENSITIVE,
+					ResultSet.CONCUR_READ_ONLY);
+			rs = stmt.executeQuery();
+			split(rs);
+		} catch (SQLException e) {
+			if (!e.getMessage().equals("The statement did not return a result set.")) {
+				Main.gui.displayMessage(e.getMessage());
+			}
+		}
+	}
+
+	private void split(ResultSet rs) {
+		Object[][] data = null;
+		Object[] columnNames;
+		int size = 0;
+		
+		if (rs == null) {
+			return;
+		}
+			
+		ResultSetMetaData meta;
+		
+		try {
+			meta = rs.getMetaData();
+			columnNames = new Object[meta.getColumnCount()];
+			
+			size = 0;
+			if (rs.last()) {
+				size = rs.getRow();
+			}
+			
+			rs.beforeFirst();
+			data = new Object[size][meta.getColumnCount()];
+
+			for (int col = 0; col < meta.getColumnCount(); col++) {
+				columnNames[col] = meta.getColumnLabel(col+1);
+			}
+			
+			for (int row = 0; rs.next(); row++) {
+				for (int col = 0; col < meta.getColumnCount(); col++) {
+					data[row][col] = rs.getObject(col+1);
+				}
+			}
+			
+			
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+		Connection c = dbcs.getConnection();
+		String query = "DELETE FROM 结果 WHERE 对应订单号 LIKE '%,%' AND 对应订单号 NOT LIKE '%[^0123456789_,]%' AND 对应订单号 != ''";
+		
+		try {
+			PreparedStatement stmt = c.prepareStatement(query, ResultSet.TYPE_SCROLL_INSENSITIVE,
+					ResultSet.CONCUR_READ_ONLY);
+			stmt.executeQuery();
+		} catch (SQLException e) {
+			if (!e.getMessage().equals("The statement did not return a result set.")) {
+				System.out.println(query);
+				Main.gui.displayMessage(e.getMessage());
+			}
+		}
+		
+		for(int row = 0; row < size; row++) {
+			String originalOrderNum = (String) data[row][9];
+			String[] orderNums = originalOrderNum.split(",");
+			for(int i = 0; i < orderNums.length; i++) {
+				Object[] thisRow = new Object[11];
+				thisRow[0] = data[row][0];
+				thisRow[1] = data[row][1];
+				thisRow[2] = data[row][2];
+				if(i == 0) {
+					thisRow[3] = data[row][3];
+					thisRow[4] = data[row][4];
+					thisRow[5] = data[row][5];
+				}else {
+					thisRow[3] = 0.0;
+					thisRow[4] = 0.0;
+					thisRow[5] = 0.0;
+				}
+				
+				thisRow[6] = data[row][6];
+				thisRow[7] = data[row][7];
+				thisRow[8] = data[row][8];
+				thisRow[9] = orderNums[i];
+				thisRow[10] = data[row][10];
+				
+				String query2 = "INSERT INTO 结果 VALUES ("
+						+ Integer.toString((int)thisRow[0])
+						+ ", '"
+						+ (String) thisRow[1]
+						+ "', '"
+						+ (String) thisRow[2]
+						+ "', "
+						+ Double.toString((double)thisRow[3])
+						+ ","
+						+ Double.toString((double)thisRow[4])
+						+ ","
+						+ Double.toString((double)thisRow[5])
+						+ ",'"
+						+ (String) thisRow[6]
+						+ "',"
+						+ Integer.toString((int)thisRow[7])
+						+ ",'"
+						+ (String) thisRow[8]
+						+ "','"
+						+ (String) thisRow[9]
+						+ "','"
+						+ (String) thisRow[10]
+						+ "')";
+				
+				try {
+					PreparedStatement stmt = c.prepareStatement(query2, ResultSet.TYPE_SCROLL_INSENSITIVE,
+							ResultSet.CONCUR_READ_ONLY);
+					stmt.executeQuery();
+				} catch (SQLException e) {
+					if (!e.getMessage().equals("The statement did not return a result set.")) {
+						Main.gui.displayMessage(e.getMessage());
+					}
+				}
+			}
+		}
+		
+		Main.gui.displayMessage("split finish");
+		
+		
 	}
 }

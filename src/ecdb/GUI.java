@@ -56,18 +56,21 @@ public class GUI {
 		JButton importButton = new JButton("导入数据");
 		JButton markDup = new JButton("标记重复"); //仅能标记出现两次的（多于两次的显示出来）
 		JButton findOrderNum = new JButton("找寻对应订单号");
+		JButton splitOrderNum = new JButton("分离对应订单号");
 //		JButton duplicateButton = new JButton("查看重复订单号");
 		JButton exitButton = new JButton("退出");
 
 		body.add(importButton);
 		body.add(markDup);
 		body.add(findOrderNum);
+		body.add(splitOrderNum);
 //		body.add(duplicateButton);
 		body.add(exitButton);
 
-		importButton.addActionListener(new importListener());
+		importButton.addActionListener(new ImportListener());
 		markDup.addActionListener(new MarkDupListener());
 		findOrderNum.addActionListener(new FindOrderNumListener());
+		splitOrderNum.addActionListener(new SplitOrderNumListener());
 //		duplicateButton.addActionListener(new duplicateListener());
 		exitButton.addActionListener(new ExitListener());
 
@@ -85,7 +88,7 @@ public class GUI {
 
 	}
 
-	private class importListener implements ActionListener {
+	private class ImportListener implements ActionListener {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
@@ -129,6 +132,15 @@ public class GUI {
 			table.rAll();			
 			displayResultSet(rs, 0);
 			displayResultSet(rs2, 1);
+		}
+
+	}
+	
+	private class SplitOrderNumListener implements ActionListener {
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			searchService.splitOrderNum();
 		}
 
 	}
