@@ -56,19 +56,19 @@ public class GUI {
 		JButton importButton = new JButton("导入数据");
 		JButton markDup = new JButton("标记重复"); //仅能标记出现两次的（多于两次的显示出来）
 		JButton findOrderNum = new JButton("找寻对应订单号");
-		JButton duplicateButton = new JButton("查看重复订单号");
+//		JButton duplicateButton = new JButton("查看重复订单号");
 		JButton exitButton = new JButton("退出");
 
 		body.add(importButton);
 		body.add(markDup);
 		body.add(findOrderNum);
-		body.add(duplicateButton);
+//		body.add(duplicateButton);
 		body.add(exitButton);
 
 		importButton.addActionListener(new importListener());
 		markDup.addActionListener(new MarkDupListener());
 		findOrderNum.addActionListener(new FindOrderNumListener());
-		duplicateButton.addActionListener(new duplicateListener());
+//		duplicateButton.addActionListener(new duplicateListener());
 		exitButton.addActionListener(new ExitListener());
 
 		body.revalidate();
@@ -98,23 +98,22 @@ public class GUI {
 		}
 	}
 
-	private class duplicateListener implements ActionListener {
-
-		@Override
-		public void actionPerformed(ActionEvent e) {
-			ResultSet rs = searchService.searchDuplicate();
-			displayResultSet(rs, 0);
-		}
-
-	}
+//	private class duplicateListener implements ActionListener {
+//
+//		@Override
+//		public void actionPerformed(ActionEvent e) {
+//			ResultSet rs = searchService.searchDuplicate();
+//			displayResultSet(rs, 0);
+//		}
+//
+//	}
 	
 	private class MarkDupListener implements ActionListener {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			searchService.markDuplicate();
 			searchService.doMarkDup();
-			ResultSet rs = searchService.markAfterDuplicate();
+			ResultSet rs = searchService.showDuplicateMoreThenTwo();
 			displayResultSet(rs, 0);
 		}
 
@@ -125,6 +124,11 @@ public class GUI {
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			searchService.findOrderNum(count);
+			ResultSet rs = searchService.showOrderNumMoreThenOne(count);
+			ResultSet rs2 = searchService.showCorrespondOrderNumMoreThenOne(count);
+			table.rAll();			
+			displayResultSet(rs, 0);
+			displayResultSet(rs2, 1);
 		}
 
 	}

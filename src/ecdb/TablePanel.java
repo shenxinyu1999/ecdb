@@ -181,5 +181,9 @@ public class TablePanel extends JPanel {
 		}
 
 	}
+	
+	public void rAll() {
+		removeAll();
+	}
 
 }
