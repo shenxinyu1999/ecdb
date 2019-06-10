@@ -19,20 +19,67 @@ public class SearchService {
 
 	}
 
-//	public ResultSet searchDuplicate() {
-//		Connection c = dbcs.getConnection();
-//		String query = "SELECT 对应订单号 FROM Sheet1 GROUP BY 对应订单号 HAVING COUNT(对应订单号) > 1";
-//		
-//		ResultSet rs = null;
-//		try {
-//			PreparedStatement stmt = c.prepareStatement(query, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
-//			rs = stmt.executeQuery();
-//		} catch (SQLException e) {
-//			Main.gui.displayMessage(e.getMessage());
-//		}
-//
-//		return rs;
-//	}
+	public void searchDuplicate() {
+		Connection c = dbcs.getConnection();
+		String query = "SELECT *FROM 结果\r\n" + 
+				"WHERE 对应订单号 IN\r\n" + 
+				"(\r\n" + 
+				"SELECT 对应订单号 FROM 结果 GROUP BY 对应订单号 HAVING COUNT(对应订单号) > 1\r\n" + 
+				") AND 对应订单号 LIKE 'CK%'\r\n" + 
+				"ORDER BY 对应订单号";
+		
+		ResultSet rs = null;
+		
+		try {
+			PreparedStatement stmt = c.prepareStatement(query, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+			rs = stmt.executeQuery();
+			combine(rs);
+		} catch (SQLException e) {
+			Main.gui.displayMessage(e.getMessage());
+		}
+
+	}
+
+	private void combine(ResultSet rs) {
+		Object[][] data = null;
+		Object[] columnNames;
+		int size = 0;
+		
+		if (rs == null) {
+			return;
+		}
+			
+		ResultSetMetaData meta;
+		
+		try {
+			meta = rs.getMetaData();
+			columnNames = new Object[meta.getColumnCount()];
+			
+			size = 0;
+			if (rs.last()) {
+				size = rs.getRow();
+			}
+			
+			rs.beforeFirst();
+			data = new Object[size][meta.getColumnCount()];
+
+			for (int col = 0; col < meta.getColumnCount(); col++) {
+				columnNames[col] = meta.getColumnLabel(col+1);
+			}
+			
+			for (int row = 0; rs.next(); row++) {
+				for (int col = 0; col < meta.getColumnCount(); col++) {
+					data[row][col] = rs.getObject(col+1);
+				}
+			}
+			
+			
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+	}
 
 	public void doMarkDup() {
 		Connection c = dbcs.getConnection();

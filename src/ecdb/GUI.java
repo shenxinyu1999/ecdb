@@ -58,7 +58,7 @@ public class GUI {
 		JButton findOrderNum = new JButton("找寻对应订单号");
 		JButton splitOrderNum = new JButton("分离对应订单号");
 		JButton findCKNum = new JButton("对应CK号");
-//		JButton duplicateButton = new JButton("查看重复订单号");
+		JButton duplicateButton = new JButton("合并相同订单号");
 		JButton exitButton = new JButton("退出");
 
 		body.add(importButton);
@@ -66,7 +66,7 @@ public class GUI {
 		body.add(findOrderNum);
 		body.add(splitOrderNum);
 		body.add(findCKNum);
-//		body.add(duplicateButton);
+		body.add(duplicateButton);
 		body.add(exitButton);
 
 		importButton.addActionListener(new ImportListener());
@@ -74,7 +74,7 @@ public class GUI {
 		findOrderNum.addActionListener(new FindOrderNumListener());
 		splitOrderNum.addActionListener(new SplitOrderNumListener());
 		findCKNum.addActionListener(new CKListener());
-//		duplicateButton.addActionListener(new duplicateListener());
+		duplicateButton.addActionListener(new duplicateListener());
 		exitButton.addActionListener(new ExitListener());
 
 		body.revalidate();
@@ -104,15 +104,14 @@ public class GUI {
 		}
 	}
 
-//	private class duplicateListener implements ActionListener {
-//
-//		@Override
-//		public void actionPerformed(ActionEvent e) {
-//			ResultSet rs = searchService.searchDuplicate();
-//			displayResultSet(rs, 0);
-//		}
-//
-//	}
+	private class duplicateListener implements ActionListener {
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			searchService.searchDuplicate();
+		}
+
+	}
 	
 	private class MarkDupListener implements ActionListener {
 
