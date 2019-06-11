@@ -76,66 +76,173 @@ public class SearchService {
 			e.printStackTrace();
 		}
 		
-		Connection c = dbcs.getConnection();		
-		for(int row = 0; row < size; row++) {
-			String originalOrderNum = (String) data[row][9];
-			String[] orderNums = originalOrderNum.split(",");
-			for(int i = 0; i < orderNums.length; i++) {
-				Object[] thisRow = new Object[11];
-				thisRow[0] = data[row][0];
-				thisRow[1] = data[row][1];
-				thisRow[2] = data[row][2];
-				if(i == 0) {
-					thisRow[3] = data[row][3];
-					thisRow[4] = data[row][4];
-					thisRow[5] = data[row][5];
-				}else {
-					thisRow[3] = 0.0;
-					thisRow[4] = 0.0;
-					thisRow[5] = 0.0;
+		
+		
+		
+		
+		
+		
+		ArrayList<String[]> result = new ArrayList<>();		
+		
+		ArrayList<String> allYunDan = new ArrayList<>();
+		ArrayList<String> allShengShi = new ArrayList<>();
+		ArrayList<String> allKuaiDi = new ArrayList<>();
+		ArrayList<String> allBeiZhu = new ArrayList<>();
+		
+		String bianHao = Integer.toString((int) data[0][0]);
+		allYunDan.add((String) data[0][1]);
+		allShengShi.add((String) data[0][2]);
+		double zhongLiang = (double) data[0][3];
+		double jiFeiZhongLiang = (double) data[0][4];
+		double danWeiZongJia = (double) data[0][5];
+		allKuaiDi.add((String) data[0][6]);
+		String yueFen = Integer.toString((int) data[0][7]);
+		allBeiZhu.add((String) data[0][8]);
+		String dianPu = (String) data[0][10];
+		
+		String currentNum = (String) data[0][9];
+		int index = 1;
+		while (index < data.length) {
+			while(index < data.length && currentNum.equals((String) data[index][9])) {
+				String nYunDan = (String) data[index][1];
+				String nShengShi = (String) data[index][2];
+				double nZhongLiang = (double) data[index][3];
+				double nJiFeiZhongLiang = (double) data[index][4];
+				double nDanWeiZongJia = (double) data[index][5];
+				String nKuaiDi = (String) data[index][6];
+				String nYueFen = Integer.toString((int) data[index][7]);
+				String nBeiZhu = (String) data[index][8];
+				String nDianPu = (String) data[index][10];
+				if(!allYunDan.contains(nYunDan)) {
+					allYunDan.add(nYunDan);
 				}
-				
-				thisRow[6] = data[row][6];
-				thisRow[7] = data[row][7];
-				thisRow[8] = data[row][8];
-				thisRow[9] = orderNums[i];
-				thisRow[10] = data[row][10];
-				
-				String query2 = "INSERT INTO 结果 VALUES ("
-						+ Integer.toString((int)thisRow[0])
-						+ ", '"
-						+ (String) thisRow[1]
-						+ "', '"
-						+ (String) thisRow[2]
-						+ "', "
-						+ Double.toString((double)thisRow[3])
-						+ ","
-						+ Double.toString((double)thisRow[4])
-						+ ","
-						+ Double.toString((double)thisRow[5])
-						+ ",'"
-						+ (String) thisRow[6]
-						+ "',"
-						+ Integer.toString((int)thisRow[7])
-						+ ",'"
-						+ (String) thisRow[8]
-						+ "','"
-						+ (String) thisRow[9]
-						+ "','"
-						+ (String) thisRow[10]
-						+ "')";
-				
-				try {
-					PreparedStatement stmt = c.prepareStatement(query2, ResultSet.TYPE_SCROLL_INSENSITIVE,
-							ResultSet.CONCUR_READ_ONLY);
-					stmt.executeQuery();
-				} catch (SQLException e) {
-					if (!e.getMessage().equals("The statement did not return a result set.")) {
-						Main.gui.displayMessage(e.getMessage());
+				if(!allShengShi.contains(nShengShi)) {
+					allShengShi.add(nShengShi);
+				}
+				zhongLiang = zhongLiang + nZhongLiang;
+				jiFeiZhongLiang = jiFeiZhongLiang + nJiFeiZhongLiang;
+				danWeiZongJia = danWeiZongJia + nDanWeiZongJia;
+				if(!allKuaiDi.contains(nKuaiDi)) {
+					allKuaiDi.add(nKuaiDi);
+				}
+				if(nYueFen.compareTo(yueFen) < 0) {
+					yueFen = nYueFen;
+				}
+				if(!allBeiZhu.contains(nBeiZhu)){
+					allBeiZhu.add(nBeiZhu);
+				}
+				if(nDianPu.compareTo(dianPu) < 0) {
+					dianPu = nDianPu;
+				}
+				index++;
+			}
+			
+			if(index >= data.length) {
+				break;
+			}
+			String[] row = new String[11];
+			row[0] = bianHao;
+			row[1] = allYunDan.get(0);
+			row[2] = allShengShi.get(0);
+			for (int i = 1; i < allShengShi.size();i++) {
+				if(!allShengShi.get(i).equals("")) {
+					row[2] = row[2] + "/" + allShengShi.get(i);
+				}
+			}
+			row[3] = Double.toString(zhongLiang);
+			row[4] = Double.toString(jiFeiZhongLiang);
+			row[5] = Double.toString(danWeiZongJia);
+			row[6] = allKuaiDi.get(0);
+			for (int i = 1; i < allKuaiDi.size();i++) {
+				if(!allKuaiDi.get(i).equals("")) {
+					row[6] = row[6] + "/" + allKuaiDi.get(i);
+				}
+			}
+			row[7] = yueFen;
+			row[8] = allBeiZhu.get(0);
+			for (int i = 1; i < allBeiZhu.size();i++) {
+				if(!allBeiZhu.get(i).equals("")) {
+					row[8] = row[8] + "/" + allBeiZhu.get(i);
+				}
+			}
+			for (int i = 1; i < allYunDan.size();i++) {
+				if(!allYunDan.get(i).equals("")) {
+					if(row[8].equals("")) {
+						row[8] = row[8] + allYunDan.get(i);
+					}else {
+						row[8] = row[8] + "/" + allYunDan.get(i);
 					}
 				}
 			}
-		}		
+			row[9] = currentNum;
+			row[10] = dianPu;
+			
+			result.add(row);
+			allBeiZhu.removeAll(allBeiZhu);
+			allKuaiDi.removeAll(allKuaiDi);
+			allShengShi.removeAll(allShengShi);
+			yueFen = Integer.toString((int) data[index][7]);
+			allYunDan.removeAll(allYunDan);
+			zhongLiang = 0.0;
+			jiFeiZhongLiang = 0.0;
+			danWeiZongJia = 0.0;
+			bianHao = Integer.toString((int) data[index][0]);
+			dianPu = (String) data[index][10];
+			currentNum = (String) data[index][9];
+		}
+		
+		Connection c = dbcs.getConnection();
+		String deleteQuery = "DELETE FROM 结果 WHERE 对应订单号 IN (  \r\n" + 
+				"				SELECT 对应订单号 FROM 结果 GROUP BY 对应订单号 HAVING COUNT(对应订单号) > 1  \r\n" + 
+				"				) AND 对应订单号 LIKE 'CK%'";
+		
+		try {
+			PreparedStatement stmt = c.prepareStatement(deleteQuery, ResultSet.TYPE_SCROLL_INSENSITIVE,
+					ResultSet.CONCUR_READ_ONLY);
+			stmt.executeQuery();
+		} catch (SQLException e) {
+			if (!e.getMessage().equals("The statement did not return a result set.")) {
+				Main.gui.displayMessage(e.getMessage());
+			}
+		}
+		for(String[] r:result) {
+
+			
+			String query = "INSERT INTO 结果 VALUES ("
+					+ r[0]
+					+ ", '"
+					+ r[1]
+					+ "', '"
+					+ r[2]
+					+ "', "
+					+ r[3]
+					+ ","
+					+ r[4]
+					+ ","
+					+ r[5]
+					+ ",'"
+					+ r[6]
+					+ "',"
+					+ r[7]
+					+ ",'"
+					+ r[8]
+					+ "','"
+					+ r[9]
+					+ "','"
+					+ r[10]
+					+ "')";
+			
+			try {
+				PreparedStatement stmt = c.prepareStatement(query, ResultSet.TYPE_SCROLL_INSENSITIVE,
+						ResultSet.CONCUR_READ_ONLY);
+				stmt.executeQuery();
+			} catch (SQLException e) {
+				if (!e.getMessage().equals("The statement did not return a result set.")) {
+					Main.gui.displayMessage(e.getMessage());
+				}
+			}
+		}
+		
 	}
 
 	public void doMarkDup() {
