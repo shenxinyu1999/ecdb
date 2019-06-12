@@ -21,6 +21,7 @@ public class GUI {
 	TablePanel table;
 	ImportService importService;
 	SearchService searchService;
+	ExportService exportService;
 	int count = 0;
 
 	public GUI() {
@@ -38,6 +39,7 @@ public class GUI {
 		frame.setVisible(true);
 		importService = new ImportService();
 		searchService = new SearchService();
+		exportService = new ExportService();
 	}
 
 	public void displayMessage(String msg) {
@@ -59,6 +61,7 @@ public class GUI {
 		JButton splitOrderNum = new JButton("分离对应订单号");
 		JButton findCKNum = new JButton("对应CK号");
 		JButton duplicateButton = new JButton("合并相同订单号");
+		JButton exportButton = new JButton("导出");
 		JButton exitButton = new JButton("退出");
 
 		body.add(importButton);
@@ -67,6 +70,7 @@ public class GUI {
 		body.add(splitOrderNum);
 		body.add(findCKNum);
 		body.add(duplicateButton);
+		body.add(exportButton);
 		body.add(exitButton);
 
 		importButton.addActionListener(new ImportListener());
@@ -75,6 +79,7 @@ public class GUI {
 		splitOrderNum.addActionListener(new SplitOrderNumListener());
 		findCKNum.addActionListener(new CKListener());
 		duplicateButton.addActionListener(new duplicateListener());
+		exportButton.addActionListener(new ExportListener());
 		exitButton.addActionListener(new ExitListener());
 
 		body.revalidate();
@@ -109,6 +114,7 @@ public class GUI {
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			searchService.searchDuplicate();
+			displayMessage("duplicate finish");
 		}
 
 	}
@@ -131,9 +137,12 @@ public class GUI {
 			searchService.findOrderNum(count);
 			ResultSet rs = searchService.showOrderNumMoreThenOne(count);
 			ResultSet rs2 = searchService.showCorrespondOrderNumMoreThenOne(count);
-			table.rAll();			
-			displayResultSet(rs, 0);
-			displayResultSet(rs2, 1);
+			searchService.findAndCombine(rs, rs2);
+			System.out.println("hello?");
+			searchService.findInComment(count);
+			System.out.println("hello!!");
+			table.rAll();
+			displayMessage("Find finish");
 		}
 
 	}
@@ -144,6 +153,7 @@ public class GUI {
 		public void actionPerformed(ActionEvent e) {
 			searchService.findslash16(count);
 			searchService.splitOrderNum();
+			displayMessage("Split finish");
 		}
 
 	}
@@ -153,6 +163,18 @@ public class GUI {
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			searchService.findCK();
+			displayMessage("CK finish");
+		}
+
+	}
+	
+	private class ExportListener implements ActionListener {
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			Object[][] data = searchService.getData();
+			Object[][] data2 = searchService.getData2();
+			exportService.exportFile(data, data2);
 		}
 
 	}

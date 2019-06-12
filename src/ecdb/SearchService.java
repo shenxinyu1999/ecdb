@@ -359,6 +359,114 @@ public class SearchService {
 		return rs;
 	}
 
+	public void findAndCombine(ResultSet rs, ResultSet rs2) {
+		Object[][] data = null;
+		Object[] columnNames;
+		int size = 0;
+		
+		if (rs == null) {
+			return;
+		}
+			
+		ResultSetMetaData meta;
+		
+		try {
+			meta = rs.getMetaData();
+			columnNames = new Object[meta.getColumnCount()];
+			
+			size = 0;
+			if (rs.last()) {
+				size = rs.getRow();
+			}
+			
+			rs.beforeFirst();
+			data = new Object[size][meta.getColumnCount()];
+
+			for (int col = 0; col < meta.getColumnCount(); col++) {
+				columnNames[col] = meta.getColumnLabel(col+1);
+			}
+			
+			for (int row = 0; rs.next(); row++) {
+				for (int col = 0; col < meta.getColumnCount(); col++) {
+					data[row][col] = rs.getObject(col+1);
+				}
+			}
+			
+			
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+		Object[][] data2 = null;
+		Object[] columnNames2;
+		int size2 = 0;
+		
+		if (rs2 == null) {
+			return;
+		}
+			
+		ResultSetMetaData meta2;
+		
+		try {
+			meta2 = rs2.getMetaData();
+			columnNames2 = new Object[meta2.getColumnCount()];
+			
+			size2 = 0;
+			if (rs2.last()) {
+				size2 = rs2.getRow();
+			}
+			
+			rs2.beforeFirst();
+			data2 = new Object[size2][meta2.getColumnCount()];
+
+			for (int col2 = 0; col2 < meta2.getColumnCount(); col2++) {
+				columnNames2[col2] = meta2.getColumnLabel(col2+1);
+			}
+			
+			for (int row2 = 0; rs2.next(); row2++) {
+				for (int col2 = 0; col2 < meta2.getColumnCount(); col2++) {
+					data2[row2][col2] = rs2.getObject(col2+1);
+				}
+			}			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+		for(int i = 0; i < data.length ; i++) {
+			String currentNum = (String) data[i][1];
+			ArrayList<String> num = new ArrayList<>();
+			for(int j = 0 ; j < data2.length ; j++) {
+				if(currentNum.equals((String) data2[j][1]) && !((String) data2[j][0]).equals("")) {
+					num.add((String) data2[j][0]);
+				}
+			}
+			String tNum = num.get(0);
+			for(int k = 1; k < num.size() ; k++) {
+				tNum = tNum + "," + num.get(k);
+			}
+			Connection c = dbcs.getConnection();
+			String query = "UPDATE 结果 SET 对应订单号 = '"
+					+ tNum
+					+ "'\r\n" + 
+					"WHERE 运单编号 = '"
+					+ currentNum
+					+ "'";
+			
+			ResultSet r = null;
+			try {
+				PreparedStatement stmt = c.prepareStatement(query, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+				r = stmt.executeQuery();
+			} catch (SQLException e) {
+				if (!e.getMessage().equals("The statement did not return a result set.")) {
+					System.out.println(query);
+					Main.gui.displayMessage(e.getMessage());
+				}
+			}
+			
+		}		
+	}
+
 	public ResultSet showCorrespondOrderNumMoreThenOne(int count) {
 		Connection c = dbcs.getConnection();
 		String query = "DECLARE @dy TABLE(\r\n" + 
@@ -552,8 +660,6 @@ public class SearchService {
 				Main.gui.displayMessage(e.getMessage());
 			}
 		}
-
-		Main.gui.displayMessage("split finish");
 	}
 
 	
@@ -575,7 +681,143 @@ public class SearchService {
 				Main.gui.displayMessage(e.getMessage());
 			}
 		}
+	}
 
-		Main.gui.displayMessage("CK finish");
+	public void findInComment(int count) {
+		Connection c = dbcs.getConnection();
+		String query = "";
+		for (int i = 1; i < count-1; i++) {
+			String s = "对应数据" + Integer.toString(i);
+			query = query +  "UPDATE t2  SET t2.对应订单号 = t1.订单号\r\n" + 
+					"FROM\r\n" + 
+					"(SELECT * FROM  "
+					+ s
+					+ " WHERE 备注 != '') AS t1\r\n" + 
+					"JOIN (SELECT * FROM 结果 WHERE 对应订单号 = '') AS t2 on t1.备注 LIKE CONCAT('%', t2.运单编号 , '%') \r\n" + 
+					"";
+		
+		}
+		try {
+			PreparedStatement stmt = c.prepareStatement(query, ResultSet.TYPE_SCROLL_INSENSITIVE,
+					ResultSet.CONCUR_READ_ONLY);
+			stmt.executeQuery();
+		} catch (SQLException e) {
+			if (!e.getMessage().equals("The statement did not return a result set.")) {
+				System.out.println(query);
+				Main.gui.displayMessage(e.getMessage());
+			}
+		}
+	}
+
+	public Object[][] getData() {
+		Connection c = dbcs.getConnection();
+		String query = "SELECT * FROM 结果 WHERE 对应订单号 LIKE 'CK%'";
+		
+		ResultSet rs = null;
+		try {
+			PreparedStatement stmt = c.prepareStatement(query, ResultSet.TYPE_SCROLL_INSENSITIVE,
+					ResultSet.CONCUR_READ_ONLY);
+			rs = stmt.executeQuery();
+		} catch (SQLException e) {
+			if (!e.getMessage().equals("The statement did not return a result set.")) {
+				System.out.println(query);
+				Main.gui.displayMessage(e.getMessage());
+			}
+		}
+		
+		Object[][] data = null;
+		Object[] columnNames;
+		int size = 0;
+		
+		if (rs == null) {
+			return null;
+		}
+			
+		ResultSetMetaData meta;
+		
+		try {
+			meta = rs.getMetaData();
+			columnNames = new Object[meta.getColumnCount()];
+			
+			size = 0;
+			if (rs.last()) {
+				size = rs.getRow();
+			}
+			
+			rs.beforeFirst();
+			data = new Object[size][meta.getColumnCount()];
+
+			for (int col = 0; col < meta.getColumnCount(); col++) {
+				columnNames[col] = meta.getColumnLabel(col+1);
+			}
+			
+			for (int row = 0; rs.next(); row++) {
+				for (int col = 0; col < meta.getColumnCount(); col++) {
+					data[row][col] = rs.getObject(col+1);
+				}
+			}
+			
+			
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return data;
+	}
+	
+	public Object[][] getData2() {
+		Connection c = dbcs.getConnection();
+		String query = "SELECT * FROM 结果 WHERE 对应订单号 NOT LIKE 'CK%'";
+		
+		ResultSet rs = null;
+		try {
+			PreparedStatement stmt = c.prepareStatement(query, ResultSet.TYPE_SCROLL_INSENSITIVE,
+					ResultSet.CONCUR_READ_ONLY);
+			rs = stmt.executeQuery();
+		} catch (SQLException e) {
+			if (!e.getMessage().equals("The statement did not return a result set.")) {
+				System.out.println(query);
+				Main.gui.displayMessage(e.getMessage());
+			}
+		}
+		
+		Object[][] data = null;
+		Object[] columnNames;
+		int size = 0;
+		
+		if (rs == null) {
+			return null;
+		}
+			
+		ResultSetMetaData meta;
+		
+		try {
+			meta = rs.getMetaData();
+			columnNames = new Object[meta.getColumnCount()];
+			
+			size = 0;
+			if (rs.last()) {
+				size = rs.getRow();
+			}
+			
+			rs.beforeFirst();
+			data = new Object[size][meta.getColumnCount()];
+
+			for (int col = 0; col < meta.getColumnCount(); col++) {
+				columnNames[col] = meta.getColumnLabel(col+1);
+			}
+			
+			for (int row = 0; rs.next(); row++) {
+				for (int col = 0; col < meta.getColumnCount(); col++) {
+					data[row][col] = rs.getObject(col+1);
+				}
+			}
+			
+			
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return data;
 	}
 }	
